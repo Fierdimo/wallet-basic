@@ -25,6 +25,75 @@ In the output, you'll find options to open the app in a
 
 You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
 
+## Obtener el ABI del contrato
+
+La app habla con el contrato a través de `TOKEN_ABI` en [`src/services/blockchain/core/blockchain.ts`](src/services/blockchain/core/blockchain.ts), escrito en formato _human-readable_ de ethers. Si una función, evento o error no está ahí, ethers no puede llamarlo ni decodificarlo (por ejemplo, un revert aparece como `unknown custom error`).
+
+### De dónde sale
+
+Al compilar en Remix se genera `../contracts/artifacts/MiToken.json` (~470 KB). Casi todo es bytecode; lo único que importa es la clave `abi`, al final del archivo:
+
+```
+MiToken.json
+├── deploy                → configuración de deploy por red
+├── data
+│   ├── bytecode          → código para desplegar
+│   ├── deployedBytecode  → código que queda en la cadena
+│   ├── gasEstimates      → gas estimado por función
+│   └── methodIdentifiers → selectores, ej: "transfer(address,uint256)": "a9059cbb"
+└── abi                   → ⭐ funciones, eventos y errores del contrato
+```
+
+### Listar cada elemento en formato `TOKEN_ABI`
+
+Desde la raíz de `mi-dapp` (usa el `ethers` del proyecto):
+
+```bash
+# Todo el ABI, una línea por elemento
+node -e 'const {Interface}=require("ethers"); console.log(new Interface(require("../contracts/artifacts/MiToken.json").abi).format().join("\n"))'
+```
+
+Filtrar por tipo (`function`, `event` o `error`):
+
+```bash
+node -e 'const {Interface}=require("ethers"); const t=process.argv[1]; new Interface(require("../contracts/artifacts/MiToken.json").abi).fragments.filter(f=>f.type===t).forEach(f=>console.log(f.format("full")))' event
+```
+
+Como arreglo listo para pegar en `TOKEN_ABI`:
+
+```bash
+node -e 'const {Interface}=require("ethers"); console.log(JSON.stringify(new Interface(require("../contracts/artifacts/MiToken.json").abi).format(), null, 2))'
+```
+
+> Omite la línea `constructor(...)`: solo se usa en el deploy.
+
+### Leerlo a mano
+
+Cada elemento de `abi` tiene un `type`. Así se traduce al formato de `TOKEN_ABI`:
+
+```json
+{
+  "type": "event",
+  "name": "Transfer",
+  "inputs": [
+    { "indexed": true,  "name": "from",  "type": "address" },
+    { "indexed": true,  "name": "to",    "type": "address" },
+    { "indexed": false, "name": "value", "type": "uint256" }
+  ]
+}
+```
+
+→ `"event Transfer(address indexed from, address indexed to, uint256 value)"`
+
+- `type` → palabra inicial: `function`, `event` o `error`.
+- `name` → el nombre.
+- `inputs` → parámetros en orden como `tipo nombre`; en eventos agrega `indexed` si `"indexed": true`.
+- `stateMutability` (funciones) → `view`/`pure` se escriben tras los paréntesis; `nonpayable` se omite; `payable` se escribe.
+- `outputs` (funciones) → `returns (tipo)` al final.
+- `internalType` → se ignora.
+
+La firma debe coincidir exacto con Solidity (nombre, tipos, orden e `indexed`): el nodo identifica eventos y errores por el hash de `Nombre(tipos)`, así que un tipo distinto hace que nunca coincidan.
+
 ## Get a fresh project
 
 When you're ready, run:
