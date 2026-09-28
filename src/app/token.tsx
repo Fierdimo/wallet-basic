@@ -17,6 +17,7 @@ import { ApproveForm, MintForm, TransferForm, TransferFromForm } from "@/compone
 import { TransferHistory } from "@/components/token/transfer-history";
 import { useBlockchain } from "@/hooks/useBlockchain";
 import { ANVIL_ACCOUNTS, shortenAddress, TestAccount } from "@/services/blockchain/core/accounts";
+import { AppKitButton } from "@reown/appkit-react-native";
 
 type ActionKey = "transfer" | "approve" | "transferFrom" | "mint";
 
@@ -81,6 +82,7 @@ export default function TokenDashboardScreen() {
             <Text style={styles.totalSupply}>
               Suministro Total: {parseFloat(metadata?.formattedTotalSupply ?? "0").toLocaleString()} {symbol}
             </Text>
+            <AppKitButton />
           </View>
 
           {/* MENSAJE DE ERROR GLOBAL (SI EXISTE) */}

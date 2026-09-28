@@ -1,12 +1,10 @@
 // src/services/blockchain/core/blockchain.ts
 import { Contract, ethers, JsonRpcProvider } from "ethers";
 
-// ⚠️ REEMPLAZA CON LA IP ACTUAL DE TU MAC (Usa: ipconfig getifaddr en0)
-const MAC_IP = "192.168.1.30"; 
-const ANVIL_RPC_URL = `http://${MAC_IP}:8545`;
+const ANVIL_RPC_URL = `http://${process.env.EXPO_PUBLIC_ANVIL_RPC_URL}:8545`;
 
 // ⚠️ REEMPLAZA CON LA DIRECCIÓN QUE TE DIO REMIX AL HACER DEPLOY
-const CONTRACT_ADDRESS = "0x0165878A594ca255338adfa4d48449f69242Eb8F";
+const CONTRACT_ADDRESS = "0x5FbDB2315678afecb367f032d93F642f64180aa3";
 
 // Human-Readable ABI: Declaramos exactamente lo que expone tu contrato en Solidity
 const TOKEN_ABI: string[] = [

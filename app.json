@@ -32,7 +32,8 @@
           "image": "./assets/images/splash-icon.png",
           "imageWidth": 76
         }
-      ]
+      ],
+      "scripts/queries.js"
     ],
     "experiments": {
       "typedRoutes": true,
